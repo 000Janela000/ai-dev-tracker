@@ -1,4 +1,6 @@
 import { Header } from "@/components/dashboard/header";
+import { HeroSection } from "@/components/dashboard/hero-section";
+import { StatsBar } from "@/components/dashboard/stats-bar";
 import { DashboardContent } from "./content";
 import { getRecentItems, getItemCounts } from "@/lib/db/queries";
 
@@ -15,9 +17,10 @@ export default async function DashboardPage() {
       getItemCounts(),
     ]);
   } catch {
-    // Database not configured yet — show empty state
     dbError = true;
   }
+
+  const totalItems = counts.reduce((sum, c) => sum + c.count, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,6 +33,8 @@ export default async function DashboardPage() {
             <code>npm run db:push</code> to create tables.
           </div>
         )}
+        <StatsBar counts={counts} totalItems={totalItems} />
+        <HeroSection items={items} />
         <DashboardContent items={items} />
       </main>
     </div>

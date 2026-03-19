@@ -139,7 +139,7 @@
 
 ---
 
-## Phase 8: Enhanced Dashboard Features `[ ]`
+## Phase 8: Enhanced Dashboard Features `[x]`
 
 **Goal**: Add the features that make this genuinely useful beyond basic aggregation.
 
@@ -157,7 +157,7 @@
 
 ---
 
-## Phase 9: Polish & Deploy `[ ]`
+## Phase 9: Polish & Deploy `[x]`
 
 **Goal**: Production-ready deployment with good UX.
 
@@ -185,3 +185,4 @@
 | 2026-03-19 | Phases 1-3 completed | Core types, 4 source adapters (RSS/HN/GitHub/ArXiv), Drizzle storage layer, dedup pipeline, pipeline script |
 | 2026-03-19 | Phases 4-5 completed | Dashboard UI (header, category tabs, time filter, search, item cards, loading/empty states) + detail view with related items |
 | 2026-03-19 | Phases 6-7 completed | Gemini Flash-Lite summarization (prompt engineering, Zod validation, rate limiting, fallback) + GitHub Actions cron workflow |
+| 2026-03-19 | Phases 8-9 completed | Hero section, stats bar, search API, error/404 pages, SEO metadata, Vercel-ready config. All 9 phases complete. |
