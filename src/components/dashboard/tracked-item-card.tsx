@@ -26,15 +26,31 @@ function getSourceLabel(source: string): string {
     "rss:openai": "OpenAI",
     "rss:deepmind": "DeepMind",
     "rss:meta-ai": "Meta AI",
+    "rss:microsoft-ai": "Microsoft AI",
     "rss:huggingface": "Hugging Face",
+    "rss:mistral": "Mistral AI",
+    "rss:vercel-ai": "Vercel AI",
     "rss:the-decoder": "The Decoder",
+    "rss:ai-news": "AI News",
     "rss:marktechpost": "MarkTechPost",
     "rss:venturebeat-ai": "VentureBeat",
     hackernews: "Hacker News",
+    "reddit:machinelearning": "r/MachineLearning",
+    "reddit:localllama": "r/LocalLLaMA",
+    "reddit:artificial": "r/artificial",
+    devto: "Dev.to",
     github: "GitHub",
+    "github-releases": "Release",
     "arxiv:cs-ai": "ArXiv AI",
     "arxiv:cs-cl": "ArXiv NLP",
   };
+  // Handle dynamic github-release:owner/repo sources
+  if (source.startsWith("github-release:")) {
+    return source.replace("github-release:", "") + " Release";
+  }
+  if (source.startsWith("reddit:")) {
+    return "r/" + source.replace("reddit:", "");
+  }
   return labels[source] ?? source;
 }
 
@@ -42,6 +58,7 @@ function getSourceColor(sourceType: string): string {
   const colors: Record<string, string> = {
     rss: "bg-sky-500/10 text-sky-400 border-sky-500/20",
     hackernews: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+    reddit: "bg-orange-600/10 text-orange-300 border-orange-600/20",
     github: "bg-gray-500/10 text-gray-300 border-gray-500/20",
     arxiv: "bg-red-500/10 text-red-400 border-red-500/20",
   };

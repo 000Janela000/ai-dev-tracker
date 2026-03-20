@@ -12,6 +12,7 @@
     "db:studio": "drizzle-kit studio",
     "pipeline": "tsx --tsconfig tsconfig.json scripts/pipeline.ts",
     "summarize": "tsx --tsconfig tsconfig.json scripts/summarize.ts",
+    "pipeline:light": "tsx --tsconfig tsconfig.json scripts/pipeline-light.ts",
     "pipeline:full": "tsx --tsconfig tsconfig.json scripts/pipeline.ts && tsx --tsconfig tsconfig.json scripts/summarize.ts"
   },
   "dependencies": {

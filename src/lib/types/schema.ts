@@ -22,6 +22,7 @@ export const SourceTypeEnum = z.enum([
   "hackernews",
   "github",
   "arxiv",
+  "reddit",
 ]);
 export type SourceType = z.infer<typeof SourceTypeEnum>;
 

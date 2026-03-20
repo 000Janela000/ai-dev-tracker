@@ -5,18 +5,22 @@ const ALGOLIA_BASE = "https://hn.algolia.com/api/v1/search_by_date";
 
 const AI_QUERIES = [
   "LLM",
-  "Claude",
-  "GPT",
-  "machine learning",
+  "Claude AI",
+  "GPT-4",
+  "GPT-5",
+  "OpenAI",
+  "Anthropic",
+  "Gemini model",
   "AI coding",
   "AI agent",
-  "generative AI",
-  "transformer model",
+  "open source model",
+  "RAG retrieval",
+  "fine-tuning LLM",
 ];
 
 const FETCH_TIMEOUT_MS = 10_000;
 const HITS_PER_PAGE = 50;
-const MIN_POINTS = 5;
+const MIN_POINTS = 20; // Higher threshold to filter noise
 
 interface AlgoliaHit {
   objectID: string;

@@ -2,6 +2,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  real,
   text,
   timestamp,
   uniqueIndex,
@@ -27,6 +28,7 @@ export const items = pgTable(
       .notNull()
       .defaultNow(),
     summarizedAt: timestamp("summarized_at", { withTimezone: true }),
+    significanceScore: real("significance_score"),
   },
   (table) => [uniqueIndex("items_url_normalized_idx").on(table.urlNormalized)]
 );

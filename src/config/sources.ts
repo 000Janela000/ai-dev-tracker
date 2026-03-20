@@ -1,7 +1,7 @@
 import type { SourceConfig } from "@/lib/types";
 
 export const SOURCE_REGISTRY: SourceConfig[] = [
-  // --- RSS Feeds ---
+  // --- Official AI Company Blogs (highest trust) ---
   {
     id: "rss:anthropic",
     name: "Anthropic Blog",
@@ -35,6 +35,14 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     defaultCategory: "models_releases",
   },
   {
+    id: "rss:microsoft-ai",
+    name: "Microsoft AI Blog",
+    type: "rss",
+    url: "https://blogs.microsoft.com/ai/feed/",
+    enabled: true,
+    defaultCategory: "models_releases",
+  },
+  {
     id: "rss:huggingface",
     name: "Hugging Face Blog",
     type: "rss",
@@ -43,10 +51,36 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     defaultCategory: "tools_frameworks",
   },
   {
+    id: "rss:mistral",
+    name: "Mistral AI Blog",
+    type: "rss",
+    url: "https://mistral.ai/feed/",
+    enabled: true,
+    defaultCategory: "models_releases",
+  },
+  {
+    id: "rss:vercel-ai",
+    name: "Vercel AI Blog",
+    type: "rss",
+    url: "https://vercel.com/blog/ai/rss",
+    enabled: true,
+    defaultCategory: "tools_frameworks",
+  },
+
+  // --- AI News Sites (good reporting, fast) ---
+  {
     id: "rss:the-decoder",
     name: "The Decoder",
     type: "rss",
     url: "https://the-decoder.com/feed/",
+    enabled: true,
+    defaultCategory: "industry_trends",
+  },
+  {
+    id: "rss:ai-news",
+    name: "AI News",
+    type: "rss",
+    url: "https://www.artificialintelligence-news.com/feed/",
     enabled: true,
     defaultCategory: "industry_trends",
   },
@@ -67,7 +101,7 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     defaultCategory: "industry_trends",
   },
 
-  // --- APIs ---
+  // --- Community & Aggregator APIs ---
   {
     id: "hackernews",
     name: "Hacker News (AI filtered)",
@@ -77,10 +111,35 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     defaultCategory: "industry_trends",
   },
   {
+    id: "reddit",
+    name: "Reddit AI Communities",
+    type: "reddit",
+    url: "https://www.reddit.com",
+    enabled: true,
+    defaultCategory: "industry_trends",
+  },
+  {
+    id: "devto",
+    name: "Dev.to AI Tag",
+    type: "rss",
+    url: "https://dev.to/api/articles",
+    enabled: true,
+    defaultCategory: "practices_approaches",
+  },
+
+  // --- Code & Research ---
+  {
     id: "github",
     name: "GitHub Trending AI Repos",
     type: "github",
     url: "https://api.github.com/search/repositories",
+    enabled: true,
+    defaultCategory: "tools_frameworks",
+  },
+  {
+    id: "github-releases",
+    name: "GitHub Releases (Watchlist)",
+    type: "github",
     enabled: true,
     defaultCategory: "tools_frameworks",
   },

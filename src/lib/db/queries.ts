@@ -63,7 +63,24 @@ export async function getRecentItems(limit = 20) {
   return db
     .select()
     .from(items)
-    .orderBy(desc(items.publishedAt))
+    .orderBy(
+      sql`${items.significanceScore} DESC NULLS LAST`,
+      desc(items.publishedAt)
+    )
+    .limit(limit);
+}
+
+export async function getTrendingItems(limit = 10) {
+  const db = getDb();
+  const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+  return db
+    .select()
+    .from(items)
+    .where(gte(items.publishedAt, twoDaysAgo))
+    .orderBy(
+      sql`${items.significanceScore} DESC NULLS LAST`,
+      desc(items.publishedAt)
+    )
     .limit(limit);
 }
 

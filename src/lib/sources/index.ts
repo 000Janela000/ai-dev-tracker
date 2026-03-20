@@ -3,6 +3,9 @@ import { fetchAllRssFeeds } from "./rss";
 import { fetchHackerNews } from "./hackernews";
 import { fetchGitHub } from "./github";
 import { fetchArxiv } from "./arxiv";
+import { fetchReddit } from "./reddit";
+import { fetchGitHubReleases } from "./github-releases";
+import { fetchDevTo } from "./devto";
 
 export interface FetchAllResult {
   items: NewTrackedItem[];
@@ -12,57 +15,67 @@ export interface FetchAllResult {
   failedSources: number;
 }
 
+/** Full pipeline — all sources including slow ones (GitHub search, ArXiv) */
 export async function fetchAllSources(since: Date): Promise<FetchAllResult> {
   console.log(
-    `[Pipeline] Fetching all sources since ${since.toISOString()}...`
+    `[Pipeline] Fetching ALL sources since ${since.toISOString()}...`
   );
 
-  // Run all source types concurrently
-  const [rssResults, hnResult, githubResult, arxivResult] =
-    await Promise.allSettled([
-      fetchAllRssFeeds(since),
-      fetchHackerNews(since),
-      fetchGitHub(since),
-      fetchArxiv(since),
-    ]);
+  const settled = await Promise.allSettled([
+    fetchAllRssFeeds(since),
+    fetchHackerNews(since),
+    fetchGitHub(since),
+    fetchArxiv(since),
+    fetchReddit(since),
+    fetchGitHubReleases(since),
+    fetchDevTo(since),
+  ]);
 
+  return collectResults(settled);
+}
+
+/** Light pipeline — fast sources only for frequent checks */
+export async function fetchLightSources(since: Date): Promise<FetchAllResult> {
+  console.log(
+    `[Pipeline-Light] Fetching fast sources since ${since.toISOString()}...`
+  );
+
+  const settled = await Promise.allSettled([
+    fetchAllRssFeeds(since),
+    fetchReddit(since),
+    fetchGitHubReleases(since),
+    fetchDevTo(since),
+  ]);
+
+  return collectResults(settled);
+}
+
+function collectResults(
+  settled: PromiseSettledResult<FetchResult | FetchResult[]>[]
+): FetchAllResult {
   const results: FetchResult[] = [];
 
-  // Collect RSS results (array of FetchResult)
-  if (rssResults.status === "fulfilled") {
-    results.push(...rssResults.value);
-  } else {
-    results.push({
-      source: "rss:all",
-      items: [],
-      durationMs: 0,
-      error: rssResults.reason?.message ?? "RSS fetch failed",
-    });
-  }
-
-  // Collect individual adapter results
-  for (const [name, result] of [
-    ["hackernews", hnResult],
-    ["github", githubResult],
-    ["arxiv", arxivResult],
-  ] as const) {
+  for (const result of settled) {
     if (result.status === "fulfilled") {
-      results.push(result.value);
+      const value = result.value;
+      if (Array.isArray(value)) {
+        results.push(...value);
+      } else {
+        results.push(value);
+      }
     } else {
       results.push({
-        source: name,
+        source: "unknown",
         items: [],
         durationMs: 0,
-        error: result.reason?.message ?? `${name} fetch failed`,
+        error: result.reason?.message ?? "Fetch failed",
       });
     }
   }
 
-  // Aggregate
   const allItems = results.flatMap((r) => r.items);
   const failedSources = results.filter((r) => r.error).length;
 
-  // Log summary
   for (const r of results) {
     const status = r.error ? `ERROR: ${r.error}` : `${r.items.length} items`;
     console.log(`  [${r.source}] ${status} (${r.durationMs}ms)`);
@@ -84,3 +97,6 @@ export { fetchAllRssFeeds } from "./rss";
 export { fetchHackerNews } from "./hackernews";
 export { fetchGitHub } from "./github";
 export { fetchArxiv } from "./arxiv";
+export { fetchReddit } from "./reddit";
+export { fetchGitHubReleases } from "./github-releases";
+export { fetchDevTo } from "./devto";

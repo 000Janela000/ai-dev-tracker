@@ -102,6 +102,48 @@ export async function updateItemSummary(
     .where(sql`${items.id} = ${itemId}`);
 }
 
+/** Recalculate significance scores for recent items */
+export async function updateSignificanceScores(
+  scoreFn: (item: {
+    source: string;
+    publishedAt: Date;
+    importance: number | null;
+    metadata: unknown;
+  }) => number
+): Promise<number> {
+  const db = getDb();
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  // Get items from last 7 days
+  const recentItems = await db
+    .select({
+      id: items.id,
+      source: items.source,
+      publishedAt: items.publishedAt,
+      importance: items.importance,
+      metadata: items.metadata,
+    })
+    .from(items)
+    .where(sql`${items.publishedAt} >= ${sevenDaysAgo}`);
+
+  let updated = 0;
+  for (const item of recentItems) {
+    const score = scoreFn({
+      source: item.source,
+      publishedAt: item.publishedAt,
+      importance: item.importance,
+      metadata: item.metadata,
+    });
+    await db
+      .update(items)
+      .set({ significanceScore: score })
+      .where(sql`${items.id} = ${item.id}`);
+    updated++;
+  }
+
+  return updated;
+}
+
 /** Delete items older than `days` to stay within Supabase 500MB free tier */
 export async function pruneOldItems(days = 90): Promise<number> {
   const db = getDb();

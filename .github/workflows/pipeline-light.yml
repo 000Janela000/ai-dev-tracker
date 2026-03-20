@@ -1,0 +1,27 @@
+name: Light Pipeline (Fast Sources)
+
+on:
+  schedule:
+    # Every 2 hours at :37 to offset from full pipeline
+    - cron: '37 */2 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  fetch-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Fetch from fast sources (RSS, Reddit, Releases, Dev.to)
+        run: npx tsx --tsconfig tsconfig.json scripts/pipeline-light.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

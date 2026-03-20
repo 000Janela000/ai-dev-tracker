@@ -7,7 +7,8 @@
 
 import { nanoid } from "@/lib/id";
 import { fetchAllSources } from "@/lib/sources";
-import { deduplicateItems, upsertItems, logFetchRun, getLastFetchTime, pruneOldItems } from "@/lib/db";
+import { deduplicateItems, upsertItems, logFetchRun, getLastFetchTime, updateSignificanceScores, pruneOldItems } from "@/lib/db";
+import { calculateSignificanceScore } from "@/lib/scoring";
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
@@ -78,7 +79,22 @@ async function main() {
     process.exit(1);
   }
 
-  // Step 6: Prune old data (keep Supabase under 500MB)
+  // Step 6: Recalculate significance scores for recent items
+  try {
+    const scored = await updateSignificanceScores((item) =>
+      calculateSignificanceScore({
+        source: item.source,
+        publishedAt: item.publishedAt,
+        importance: item.importance,
+        metadata: item.metadata as Record<string, unknown> | null,
+      })
+    );
+    console.log(`[Pipeline] Updated significance scores for ${scored} items`);
+  } catch {
+    console.warn("[Pipeline] Scoring failed (non-critical)");
+  }
+
+  // Step 7: Prune old data (keep Supabase under 500MB)
   try {
     const pruned = await pruneOldItems(90);
     if (pruned > 0) {
