@@ -9,6 +9,7 @@ import {
   Calendar,
   Tag,
 } from "lucide-react";
+import { ItemActions } from "@/components/dashboard/item-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/dashboard/header";
@@ -113,7 +114,8 @@ export default async function ItemDetailPage({ params }: PageProps) {
           </div>
 
           {/* Actions */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <ItemActions itemId={item.id} compact={false} />
             <a href={item.url} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" size="sm">
                 <ExternalLink className="size-3.5" />

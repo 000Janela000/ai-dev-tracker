@@ -1,6 +1,6 @@
 import { sql, desc, and, eq, gte, lte, or, ilike } from "drizzle-orm";
 import { getDb } from "./client";
-import { items } from "./schema";
+import { items, userState } from "./schema";
 import type { Category } from "@/lib/types";
 
 export async function getItemsByCategory(
@@ -131,4 +131,27 @@ export async function getItemCounts() {
     .from(items)
     .groupBy(items.category);
   return result;
+}
+
+export async function getRecentItemsExcludingRead(
+  userId: string,
+  limit = 200
+) {
+  const db = getDb();
+  return db
+    .select()
+    .from(items)
+    .where(
+      sql`NOT EXISTS (
+        SELECT 1 FROM ${userState}
+        WHERE ${userState.userId} = ${userId}
+        AND ${userState.itemId} = ${items.id}
+        AND ${userState.action} = 'read'
+      )`
+    )
+    .orderBy(
+      sql`${items.significanceScore} DESC NULLS LAST`,
+      desc(items.publishedAt)
+    )
+    .limit(limit);
 }

@@ -11,6 +11,7 @@ import type { ItemRow } from "@/lib/db";
 import { CategoryTabs } from "./category-tabs";
 import { TimeFilter, type TimeRange } from "./time-filter";
 import { TrackedItemCard } from "./tracked-item-card";
+import { useUserStates } from "@/hooks/use-user-states";
 
 interface ItemListProps {
   items: ItemRow[];
@@ -26,6 +27,10 @@ export function ItemList({ items, loading }: ItemListProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>("week");
   const [search, setSearch] = useState("");
   const [scope, setScope] = useState<ScopeFilter>("dev");
+
+  // Batch-load user states for all items
+  const itemIds = useMemo(() => items.map((i) => i.id), [items]);
+  const { states: userStates } = useUserStates(itemIds);
 
   // Compute counts per category
   const counts = useMemo(() => {
@@ -158,6 +163,7 @@ export function ItemList({ items, loading }: ItemListProps) {
               tags={item.tags}
               importance={item.importance}
               metadata={item.metadata as Record<string, unknown> | null}
+              userStates={userStates[item.id]}
             />
           ))}
         </div>

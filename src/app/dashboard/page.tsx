@@ -2,7 +2,12 @@ import { Header } from "@/components/dashboard/header";
 import { HeroSection } from "@/components/dashboard/hero-section";
 import { StatsBar } from "@/components/dashboard/stats-bar";
 import { DashboardContent } from "./content";
-import { getRecentItems, getItemCounts } from "@/lib/db/queries";
+import {
+  getRecentItems,
+  getRecentItemsExcludingRead,
+  getItemCounts,
+} from "@/lib/db/queries";
+import { getUser } from "@/lib/supabase/user";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +17,12 @@ export default async function DashboardPage() {
   let dbError = false;
 
   try {
-    [items, counts] = await Promise.all([
-      getRecentItems(200),
-      getItemCounts(),
-    ]);
+    const user = await getUser();
+    const itemsQuery = user
+      ? getRecentItemsExcludingRead(user.id, 200)
+      : getRecentItems(200);
+
+    [items, counts] = await Promise.all([itemsQuery, getItemCounts()]);
   } catch {
     dbError = true;
   }

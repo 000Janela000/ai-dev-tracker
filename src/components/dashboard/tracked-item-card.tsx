@@ -6,6 +6,8 @@ import { ExternalLink, Star, MessageSquare, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CATEGORY_LABELS, type Category } from "@/lib/types";
 import { CATEGORY_BADGE_COLORS } from "./category-tabs";
+import { ItemActions } from "./item-actions";
+import type { UserAction } from "@/lib/db/user-state";
 
 interface TrackedItemCardProps {
   id: string;
@@ -20,6 +22,7 @@ interface TrackedItemCardProps {
   tags?: string[] | null;
   importance?: number | null;
   metadata?: Record<string, unknown> | null;
+  userStates?: UserAction[];
 }
 
 function getSourceLabel(source: string): string {
@@ -63,6 +66,7 @@ export function TrackedItemCard({
   tags,
   importance,
   metadata,
+  userStates,
 }: TrackedItemCardProps) {
   const displayText = summary || content || "";
   const stars = metadata?.stars as number | undefined;
@@ -129,8 +133,11 @@ export function TrackedItemCard({
         ))}
       </div>
 
-      {/* External Link */}
-      <ExternalLink className="absolute right-4 top-4 h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+      {/* Actions */}
+      <div className="absolute right-4 top-4 flex items-center gap-1">
+        <ItemActions itemId={id} initialStates={userStates} compact />
+        <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+      </div>
     </Link>
   );
 }

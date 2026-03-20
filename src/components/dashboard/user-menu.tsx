@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { LogOut, Bookmark, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -22,6 +23,20 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-2">
+      <Link
+        href="/saved"
+        className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        title="Saved"
+      >
+        <Bookmark className="size-3.5" />
+      </Link>
+      <Link
+        href="/read-later"
+        className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        title="Read Later"
+      >
+        <Clock className="size-3.5" />
+      </Link>
       {avatarUrl && (
         <img
           src={avatarUrl}
