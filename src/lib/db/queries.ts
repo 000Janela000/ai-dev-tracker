@@ -50,11 +50,22 @@ export async function searchItems(query: string, limit = 50) {
 
 export async function getUnsummarizedItems(limit = 50) {
   const db = getDb();
+  // Priority: RSS official blogs > GitHub releases > HN > Reddit > DevTo > GitHub search > ArXiv
   return db
     .select()
     .from(items)
     .where(sql`${items.summary} IS NULL`)
-    .orderBy(desc(items.publishedAt))
+    .orderBy(
+      sql`CASE ${items.sourceType}
+        WHEN 'rss' THEN 1
+        WHEN 'github' THEN 2
+        WHEN 'hackernews' THEN 3
+        WHEN 'reddit' THEN 4
+        WHEN 'arxiv' THEN 5
+        ELSE 3
+      END`,
+      desc(items.publishedAt)
+    )
     .limit(limit);
 }
 

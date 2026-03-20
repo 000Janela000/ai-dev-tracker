@@ -134,7 +134,7 @@ export async function updateSignificanceScores(
       metadata: items.metadata,
     })
     .from(items)
-    .where(sql`${items.publishedAt} >= ${sevenDaysAgo}`);
+    .where(sql`${items.publishedAt} >= ${sevenDaysAgo.toISOString()}`);
 
   let updated = 0;
   for (const item of recentItems) {

@@ -1,48 +1,49 @@
-/** Source trust weights — higher = more trusted/authoritative */
+/**
+ * Source trust weights for web developer AI orchestration feed.
+ * Higher = more likely to contain content relevant to a web dev building with AI.
+ */
 export const SOURCE_TRUST_WEIGHTS: Record<string, number> = {
-  // Official AI company blogs (highest trust — primary sources)
+  // Official AI tool blogs (highest — primary sources for tool updates)
   "rss:openai": 10,
   "rss:anthropic": 10,
-  "rss:deepmind": 10,
-  "rss:meta-ai": 10,
-  "rss:microsoft-ai": 10,
-  "rss:mistral": 9,
+  "rss:deepmind": 8,
+  "rss:meta-ai": 8,
+  "rss:microsoft-ai": 9,
+  "rss:mistral": 8,
   "rss:huggingface": 9,
-  "rss:vercel-ai": 8,
+  "rss:vercel-ai": 10,
 
-  // GitHub releases from watched repos (confirmed, versioned)
-  "github-releases": 9,
+  // GitHub releases from watched repos (confirmed, versioned, actionable)
+  "github-releases": 10,
 
-  // AI news sites (good reporting, fast)
+  // AI dev news sites (fast reporting, dev-focused)
   "rss:the-decoder": 7,
-  "rss:ai-news": 6,
-  "rss:venturebeat-ai": 6,
-  "rss:marktechpost": 5,
+  "rss:ai-news": 5,
+  "rss:venturebeat-ai": 5,
+  "rss:marktechpost": 4,
 
-  // Community sources (fast signal but noisy)
-  hackernews: 7,
-  reddit: 6,
+  // Community (signal but noisy — needs AI filtering)
+  hackernews: 5,
+  reddit: 4,
   devto: 4,
 
-  // Research (high quality but specialized)
-  arxiv: 7,
+  // Research (mostly irrelevant to web dev — disabled but keep low weight)
+  arxiv: 1,
 
-  // GitHub search (discovery, low trust — unproven repos)
+  // GitHub search (discovery, unproven)
   github: 3,
 };
 
-/** Get trust weight for a source, with fallback for dynamic source IDs */
+/** Get trust weight for a source */
 export function getSourceTrustWeight(source: string): number {
-  // Direct match
   if (source in SOURCE_TRUST_WEIGHTS) {
     return SOURCE_TRUST_WEIGHTS[source];
   }
 
-  // Match by prefix for dynamic sources like github-release:owner/repo
-  if (source.startsWith("github-release:")) return 9;
-  if (source.startsWith("reddit:")) return 6;
-  if (source.startsWith("arxiv:")) return 7;
+  if (source.startsWith("github-release:")) return 10;
+  if (source.startsWith("reddit:")) return 4;
+  if (source.startsWith("arxiv:")) return 1;
   if (source.startsWith("rss:")) return 5;
 
-  return 3; // Unknown source
+  return 2;
 }

@@ -5,11 +5,11 @@
  * Run with: npx tsx --tsconfig tsconfig.json scripts/summarize.ts
  */
 
-import { getUnsummarizedItems, updateItemSummary } from "@/lib/db";
+import { getUnsummarizedItems, updateItemSummary, updateSignificanceScores } from "@/lib/db";
 import { summarizeBatch } from "@/lib/summarizer";
+import { calculateSignificanceScore } from "@/lib/scoring";
 
 // Multi-provider: Groq (~500K tokens/day) + Gemini fallback (250 RPD)
-// Safety cap per run to prevent runaway processing on large backlogs
 const MAX_ITEMS = 200;
 
 async function main() {
@@ -32,18 +32,29 @@ async function main() {
       sourceType: item.sourceType,
     })),
     async (itemId, result) => {
-      // Mark off-topic items with importance 0 so they sink to bottom
-      const importance = result.isAIRelated ? result.importance : 0;
+      // Use relevance as importance. Items with relevance 0-1 get marked off-topic.
+      const importance = result.isRelevant ? result.relevance : 0;
+      const summary = result.isRelevant
+        ? result.summary
+        : "[Off-topic] " + result.summary;
+
+      // Map relevance to devRelevance for backward compat
+      const devRelevance =
+        result.relevance >= 3 ? "direct" : result.relevance >= 2 ? "indirect" : "general";
+
       await updateItemSummary(
         itemId,
-        result.isAIRelated ? result.summary : "[Off-topic] " + result.summary,
+        summary,
         result.category,
         importance,
         result.tags,
-        result.devRelevance
+        devRelevance
       );
-      if (!result.isAIRelated) {
-        console.log(`  [Noise] Flagged as off-topic: "${items.find(i => i.id === itemId)?.title?.slice(0, 50)}"`);
+
+      if (!result.isRelevant) {
+        console.log(
+          `  [Noise] Filtered: "${items.find((i) => i.id === itemId)?.title?.slice(0, 60)}"`
+        );
       }
     }
   );
@@ -53,6 +64,22 @@ async function main() {
   console.log(`  Succeeded: ${stats.succeeded}`);
   console.log(`  Failed: ${stats.failed}`);
   console.log(`  Used local fallback: ${stats.usedFallback}`);
+
+  // Layer 3 fix: Run scoring AFTER summarization so importance is set
+  console.log(`\n[Scoring] Recalculating significance scores...`);
+  try {
+    const scored = await updateSignificanceScores((item) =>
+      calculateSignificanceScore({
+        source: item.source,
+        publishedAt: item.publishedAt,
+        importance: item.importance,
+        metadata: item.metadata as Record<string, unknown> | null,
+      })
+    );
+    console.log(`[Scoring] Updated ${scored} items`);
+  } catch (error) {
+    console.warn("[Scoring] Failed (non-critical):", error);
+  }
 }
 
 main().catch((error) => {

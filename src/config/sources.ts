@@ -141,7 +141,7 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     name: "ArXiv cs.AI",
     type: "arxiv",
     url: "http://export.arxiv.org/api/query",
-    enabled: true,
+    enabled: false, // Disabled: 95% of papers irrelevant to web dev AI orchestration
     defaultCategory: "research_papers",
   },
   {
@@ -149,7 +149,7 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     name: "ArXiv cs.CL",
     type: "arxiv",
     url: "http://export.arxiv.org/api/query",
-    enabled: true,
+    enabled: false, // Disabled: same reason as cs.AI
     defaultCategory: "research_papers",
   },
 ];

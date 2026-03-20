@@ -8,7 +8,8 @@ const FETCH_TIMEOUT_MS = 15_000;
 const MAX_RESULTS = 50;
 
 // ArXiv categories to query
-const CATEGORIES = ["cs.AI", "cs.CL", "cs.LG"];
+// All categories disabled — academic ML papers are 95% irrelevant to web dev AI orchestration
+const CATEGORIES: string[] = [];
 
 const parser = new Parser({
   maxRedirects: 3,

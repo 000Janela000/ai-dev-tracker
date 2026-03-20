@@ -4,23 +4,23 @@ import type { DataSource, FetchResult, NewTrackedItem } from "@/lib/types";
 const ALGOLIA_BASE = "https://hn.algolia.com/api/v1/search_by_date";
 
 const AI_QUERIES = [
-  "LLM",
-  "Claude AI",
-  "GPT-4",
-  "GPT-5",
-  "OpenAI",
-  "Anthropic",
-  "Gemini model",
-  "AI coding",
-  "AI agent",
-  "open source model",
-  "RAG retrieval",
-  "fine-tuning LLM",
+  "AI coding assistant",
+  "Claude Code",
+  "GitHub Copilot",
+  "Cursor AI",
+  "AI SDK",
+  "LangChain update",
+  "Vercel AI",
+  "OpenAI API",
+  "Anthropic API",
+  "MCP protocol",
+  "AI agent framework",
+  "vibe coding",
 ];
 
 const FETCH_TIMEOUT_MS = 10_000;
 const HITS_PER_PAGE = 50;
-const MIN_POINTS = 20; // Higher threshold to filter noise
+const MIN_POINTS = 30; // Higher threshold — web dev AI content only
 
 interface AlgoliaHit {
   objectID: string;
