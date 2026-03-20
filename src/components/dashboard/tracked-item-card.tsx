@@ -29,7 +29,7 @@ function getSourceLabel(source: string): string {
     "rss:microsoft-ai": "Microsoft AI",
     "rss:huggingface": "Hugging Face",
     "rss:mistral": "Mistral AI",
-    "rss:vercel-ai": "Vercel AI",
+    "rss:vercel": "Vercel",
     "rss:the-decoder": "The Decoder",
     "rss:ai-news": "AI News",
     "rss:marktechpost": "MarkTechPost",

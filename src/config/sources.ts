@@ -6,7 +6,8 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     id: "rss:anthropic",
     name: "Anthropic Blog",
     type: "rss",
-    url: "https://www.anthropic.com/rss.xml",
+    // No official RSS — use community-maintained feed
+    url: "https://raw.githubusercontent.com/conoro/anthropic-engineering-rss-feed/main/anthropic_engineering_rss.xml",
     enabled: true,
     defaultCategory: "models_releases",
   },
@@ -31,7 +32,7 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     name: "Meta AI Blog",
     type: "rss",
     url: "https://ai.meta.com/blog/rss/",
-    enabled: true,
+    enabled: false, // No working RSS feed — returns malformed XML
     defaultCategory: "models_releases",
   },
   {
@@ -55,14 +56,14 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     name: "Mistral AI Blog",
     type: "rss",
     url: "https://mistral.ai/feed/",
-    enabled: true,
+    enabled: false, // No working RSS feed
     defaultCategory: "models_releases",
   },
   {
-    id: "rss:vercel-ai",
-    name: "Vercel AI Blog",
+    id: "rss:vercel",
+    name: "Vercel Blog",
     type: "rss",
-    url: "https://vercel.com/blog/ai/rss",
+    url: "https://vercel.com/atom",
     enabled: true,
     defaultCategory: "tools_frameworks",
   },
@@ -117,14 +118,6 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     url: "https://www.reddit.com",
     enabled: true,
     defaultCategory: "industry_trends",
-  },
-  {
-    id: "devto",
-    name: "Dev.to AI Tag",
-    type: "rss",
-    url: "https://dev.to/api/articles",
-    enabled: true,
-    defaultCategory: "practices_approaches",
   },
 
   // --- Code & Research ---
