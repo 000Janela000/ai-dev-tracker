@@ -13,6 +13,7 @@ const SummaryResponseSchema = z.object({
   tags: z.array(z.string()).default([]),
   keyTakeaway: z.string().optional(),
   devRelevance: DevRelevanceEnum.default("general"),
+  isAIRelated: z.boolean().default(true),
 });
 
 export type SummaryResponse = z.infer<typeof SummaryResponseSchema>;
@@ -71,6 +72,7 @@ export async function summarizeItem(
     tags: [],
     keyTakeaway: undefined,
     devRelevance: "general" as const,
+    isAIRelated: true,
   };
 }
 

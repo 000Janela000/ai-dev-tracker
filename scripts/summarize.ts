@@ -32,14 +32,19 @@ async function main() {
       sourceType: item.sourceType,
     })),
     async (itemId, result) => {
+      // Mark off-topic items with importance 0 so they sink to bottom
+      const importance = result.isAIRelated ? result.importance : 0;
       await updateItemSummary(
         itemId,
-        result.summary,
+        result.isAIRelated ? result.summary : "[Off-topic] " + result.summary,
         result.category,
-        result.importance,
+        importance,
         result.tags,
         result.devRelevance
       );
+      if (!result.isAIRelated) {
+        console.log(`  [Noise] Flagged as off-topic: "${items.find(i => i.id === itemId)?.title?.slice(0, 50)}"`);
+      }
     }
   );
 

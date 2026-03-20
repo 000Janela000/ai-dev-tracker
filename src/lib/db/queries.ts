@@ -84,6 +84,33 @@ export async function getTrendingItems(limit = 10) {
     .limit(limit);
 }
 
+export async function getWeeklyTopItems(limit = 30) {
+  const db = getDb();
+  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  return db
+    .select()
+    .from(items)
+    .where(gte(items.publishedAt, oneWeekAgo))
+    .orderBy(
+      sql`${items.significanceScore} DESC NULLS LAST`,
+      desc(items.publishedAt)
+    )
+    .limit(limit);
+}
+
+export async function getWeeklyCountsByCategory() {
+  const db = getDb();
+  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  return db
+    .select({
+      category: items.category,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(items)
+    .where(gte(items.publishedAt, oneWeekAgo))
+    .groupBy(items.category);
+}
+
 export async function getItemById(id: string) {
   const db = getDb();
   const result = await db

@@ -1,4 +1,4 @@
-import { Activity } from "lucide-react";
+import { Activity, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 export function Header() {
@@ -11,9 +11,15 @@ export function Header() {
             DevNews
           </span>
         </Link>
-        <p className="hidden text-sm text-muted-foreground sm:block">
-          AI developments for software engineers
-        </p>
+        <nav className="flex items-center gap-4">
+          <Link
+            href="/digest"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Sparkles className="size-3.5" />
+            <span className="hidden sm:inline">Weekly Digest</span>
+          </Link>
+        </nav>
       </div>
     </header>
   );
