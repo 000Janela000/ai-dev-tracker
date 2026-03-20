@@ -58,6 +58,7 @@ export function BriefingSection({ items, totalMinutes }: BriefingSectionProps) {
               importance={item.importance}
               metadata={item.metadata as Record<string, unknown> | null}
               userStates={userStates[item.id] as UserAction[] | undefined}
+              clusterSize={"clusterSize" in item ? (item.clusterSize as number) : undefined}
             />
             <Badge
               variant="secondary"

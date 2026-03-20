@@ -8,6 +8,7 @@ import {
 } from "@/lib/db/queries";
 import { getUser } from "@/lib/supabase/user";
 import { selectBriefingItems } from "@/lib/briefing";
+import { clusterItems } from "@/lib/clustering";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +29,9 @@ export default async function DashboardPage() {
   }
 
   const totalItems = counts.reduce((sum, c) => sum + c.count, 0);
+  const clustered = clusterItems(items);
   const { briefingItems, remainingItems, totalMinutes } =
-    selectBriefingItems(items);
+    selectBriefingItems(clustered);
 
   return (
     <div className="min-h-screen bg-background">

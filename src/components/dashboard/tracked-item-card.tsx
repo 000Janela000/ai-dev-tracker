@@ -23,6 +23,7 @@ interface TrackedItemCardProps {
   importance?: number | null;
   metadata?: Record<string, unknown> | null;
   userStates?: UserAction[];
+  clusterSize?: number;
 }
 
 function getSourceLabel(source: string): string {
@@ -67,6 +68,7 @@ export function TrackedItemCard({
   importance,
   metadata,
   userStates,
+  clusterSize,
 }: TrackedItemCardProps) {
   const displayText = summary || content || "";
   const stars = metadata?.stars as number | undefined;
@@ -92,6 +94,11 @@ export function TrackedItemCard({
         {importance && importance >= 4 && (
           <Badge className="rounded-full border-0 bg-amber-500/10 px-2 py-0.5 text-[10px] text-amber-400">
             High Impact
+          </Badge>
+        )}
+        {clusterSize && clusterSize > 1 && (
+          <Badge className="rounded-full border-0 bg-purple-500/10 px-2 py-0.5 text-[10px] text-purple-400">
+            {clusterSize} sources
           </Badge>
         )}
       </div>

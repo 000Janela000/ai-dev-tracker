@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/dashboard/header";
 import { CATEGORY_BADGE_COLORS } from "@/components/dashboard/category-tabs";
 import { CATEGORY_LABELS, type Category } from "@/lib/types";
-import { getItemById, getItemsByCategory } from "@/lib/db/queries";
+import { getItemById, getItemsByCategory, getItemsByDateRange } from "@/lib/db/queries";
+import { clusterItems } from "@/lib/clustering";
 
 export const dynamic = "force-dynamic";
 
@@ -28,12 +29,25 @@ export default async function ItemDetailPage({ params }: PageProps) {
 
   let item: Awaited<ReturnType<typeof getItemById>>;
   let related: Awaited<ReturnType<typeof getItemsByCategory>> = [];
+  let clusterSources: Awaited<ReturnType<typeof getItemById>>[] = [];
 
   try {
     item = await getItemById(id);
     if (!item) notFound();
     related = await getItemsByCategory(item.category as Category, 5);
     related = related.filter((r) => r.id !== item!.id).slice(0, 4);
+
+    // Find cluster sources: items published within 24h
+    const dayBefore = new Date(new Date(item.publishedAt).getTime() - 24 * 60 * 60 * 1000);
+    const dayAfter = new Date(new Date(item.publishedAt).getTime() + 24 * 60 * 60 * 1000);
+    const nearby = await getItemsByDateRange(dayBefore, dayAfter);
+    const clustered = clusterItems(nearby);
+    const myCluster = clustered.find((c) => c.clusterItemIds.includes(id));
+    if (myCluster && myCluster.clusterSize > 1) {
+      const otherIds = myCluster.clusterItemIds.filter((cid) => cid !== id);
+      const others = await Promise.all(otherIds.map((cid) => getItemById(cid)));
+      clusterSources = others.filter(Boolean) as NonNullable<typeof item>[];
+    }
   } catch {
     notFound();
   }
@@ -166,6 +180,37 @@ export default async function ItemDetailPage({ params }: PageProps) {
                   {tag}
                 </Badge>
               ))}
+            </div>
+          )}
+
+          {/* Cluster sources */}
+          {clusterSources.length > 0 && (
+            <div className="border-t border-border pt-6">
+              <h2 className="mb-3 text-sm font-semibold text-purple-400">
+                Also covered by {clusterSources.length} other source{clusterSources.length > 1 ? "s" : ""}
+              </h2>
+              <div className="grid gap-2">
+                {clusterSources.map((s) => (
+                  <a
+                    key={s.id}
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between rounded-lg border border-purple-500/10 bg-purple-500/5 p-3 transition-colors hover:border-purple-500/20"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{s.title}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {s.source} &middot;{" "}
+                        {formatDistanceToNow(new Date(s.publishedAt), {
+                          addSuffix: true,
+                        })}
+                      </p>
+                    </div>
+                    <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" />
+                  </a>
+                ))}
+              </div>
             </div>
           )}
 

@@ -164,6 +164,7 @@ export function ItemList({ items, loading }: ItemListProps) {
               importance={item.importance}
               metadata={item.metadata as Record<string, unknown> | null}
               userStates={userStates[item.id]}
+              clusterSize={"clusterSize" in item ? (item.clusterSize as number) : undefined}
             />
           ))}
         </div>
