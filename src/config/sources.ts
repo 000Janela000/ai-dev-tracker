@@ -4,12 +4,23 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
   // --- Official AI Company Blogs (highest trust) ---
   {
     id: "rss:anthropic",
-    name: "Anthropic Blog",
+    name: "Anthropic News",
     type: "rss",
-    // No official RSS — use community-maintained feed
-    url: "https://raw.githubusercontent.com/conoro/anthropic-engineering-rss-feed/main/anthropic_engineering_rss.xml",
+    // No official Anthropic RSS — use community scraper of anthropic.com/news.
+    // The previously-used `conoro/anthropic-engineering-rss-feed` covers only
+    // the engineering sub-surface and went stale in Nov 2025; the taobojlen
+    // feed scrapes the main news page and is updated hourly.
+    url: "https://raw.githubusercontent.com/taobojlen/anthropic-rss-feed/main/anthropic_news_rss.xml",
     enabled: true,
     defaultCategory: "models_releases",
+  },
+  {
+    id: "rss:anthropic-engineering",
+    name: "Anthropic Engineering",
+    type: "rss",
+    url: "https://raw.githubusercontent.com/conoro/anthropic-engineering-rss-feed/main/anthropic_engineering_rss.xml",
+    enabled: true,
+    defaultCategory: "practices_approaches",
   },
   {
     id: "rss:openai",
@@ -36,12 +47,14 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     defaultCategory: "models_releases",
   },
   {
-    id: "rss:microsoft-ai",
-    name: "Microsoft AI Blog",
+    id: "rss:microsoft-research",
+    name: "Microsoft Research",
     type: "rss",
-    url: "https://blogs.microsoft.com/ai/feed/",
+    // The old Microsoft AI blog (blogs.microsoft.com/ai/feed/) went stale in
+    // Dec 2022. Research feed is the most active surface.
+    url: "https://www.microsoft.com/en-us/research/feed/",
     enabled: true,
-    defaultCategory: "models_releases",
+    defaultCategory: "research_papers",
   },
   {
     id: "rss:huggingface",
@@ -64,6 +77,15 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
     name: "Vercel Blog",
     type: "rss",
     url: "https://vercel.com/atom",
+    enabled: true,
+    defaultCategory: "tools_frameworks",
+  },
+  {
+    id: "rss:cursor",
+    name: "Cursor Changelog",
+    type: "rss",
+    // cursor.com/blog/rss.xml is 404; the changelog feed is the live one.
+    url: "https://cursor.com/changelog/rss.xml",
     enabled: true,
     defaultCategory: "tools_frameworks",
   },

@@ -7,6 +7,7 @@
 
 import { nanoid } from "@/lib/id";
 import { fetchAllSources } from "@/lib/sources";
+import { logSourceHealthWarnings } from "@/lib/sources/health";
 import { deduplicateItems, upsertItems, logFetchRun, getLastFetchTime, updateSignificanceScores, pruneOldItems, getRecentTitles, closeDb } from "@/lib/db";
 import { calculateSignificanceScore } from "@/lib/scoring";
 import { promoteEligibleCandidates, restorePromotedCandidates } from "@/lib/discovery/candidates";
@@ -132,6 +133,9 @@ async function main() {
   } catch {
     console.warn("[Pipeline] Pruning failed (non-critical)");
   }
+
+  // Step 9: Source health check — warn on silent-dying feeds
+  await logSourceHealthWarnings();
 
   // Summary
   const completedAt = new Date();

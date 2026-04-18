@@ -17,6 +17,11 @@ const parser = new Parser<Record<string, never>, CustomItem>({
 
 const FETCH_TIMEOUT_MS = 10_000;
 
+// Realistic UA — some publishers (incl. Cloudflare-fronted) soft-block or
+// throttle requests with bot-identifying User-Agents like "DevNews/1.0".
+const USER_AGENT =
+  "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0 (compatible; DevNewsBot/1.1; +https://github.com/000Janela000/DevNews)";
+
 async function fetchFeedSafe(
   url: string
 ): Promise<Parser.Output<CustomItem> | null> {
@@ -26,7 +31,11 @@ async function fetchFeedSafe(
   try {
     const response = await fetch(url, {
       signal: controller.signal,
-      headers: { "User-Agent": "DevNews/1.0" },
+      headers: {
+        "User-Agent": USER_AGENT,
+        Accept:
+          "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.8",
+      },
     });
     clearTimeout(timeout);
     const xml = await response.text();
