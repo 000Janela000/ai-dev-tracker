@@ -145,7 +145,7 @@ export async function summarizeBatch(
       item.sourceType
     );
 
-    lastDelayMs = provider === "fallback" ? 0 : { groq: 4_000, gemini: 6_500 }[provider];
+    lastDelayMs = provider === "fallback" ? 0 : { groq: 4_000, cerebras: 2_500, gemini: 6_500 }[provider];
 
     const providerTag = provider === "fallback" ? " [local fallback]" : ` [${provider}]`;
     console.log(`  -> ${providerTag}`);
