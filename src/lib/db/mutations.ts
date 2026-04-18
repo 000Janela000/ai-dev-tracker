@@ -157,7 +157,7 @@ export async function updateSignificanceScores(
 /** Delete items older than `days` to stay within Supabase 500MB free tier */
 export async function pruneOldItems(days = 90): Promise<number> {
   const db = getDb();
-  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
   const deleted = await db
     .delete(items)
     .where(sql`${items.publishedAt} < ${cutoff}`)

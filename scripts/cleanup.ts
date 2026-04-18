@@ -8,7 +8,7 @@
  * Optional env: CLEANUP_RETENTION_DAYS (default 14)
  */
 
-import { pruneOldItems } from "@/lib/db";
+import { pruneOldItems, closeDb } from "@/lib/db";
 
 const RETENTION_DAYS = Number(process.env.CLEANUP_RETENTION_DAYS ?? 14);
 
@@ -28,7 +28,9 @@ async function main() {
   console.log(`[Cleanup] Deleted ${deleted} items.`);
 }
 
-main().catch((error) => {
-  console.error("[Cleanup] Fatal error:", error);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error("[Cleanup] Fatal error:", error);
+    process.exitCode = 1;
+  })
+  .finally(() => closeDb());

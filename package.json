@@ -10,10 +10,12 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "pipeline": "tsx --tsconfig tsconfig.json scripts/pipeline.ts",
-    "summarize": "tsx --tsconfig tsconfig.json scripts/summarize.ts",
-    "pipeline:light": "tsx --tsconfig tsconfig.json scripts/pipeline-light.ts",
-    "pipeline:full": "tsx --tsconfig tsconfig.json scripts/pipeline.ts && tsx --tsconfig tsconfig.json scripts/summarize.ts"
+    "pipeline": "tsx --env-file-if-exists=.env.local --tsconfig tsconfig.json scripts/pipeline.ts",
+    "summarize": "tsx --env-file-if-exists=.env.local --tsconfig tsconfig.json scripts/summarize.ts",
+    "pipeline:light": "tsx --env-file-if-exists=.env.local --tsconfig tsconfig.json scripts/pipeline-light.ts",
+    "pipeline:full": "npm run pipeline && npm run summarize",
+    "cleanup": "tsx --env-file-if-exists=.env.local --tsconfig tsconfig.json scripts/cleanup.ts",
+    "all": "npm run pipeline && npm run summarize && npm run cleanup"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",

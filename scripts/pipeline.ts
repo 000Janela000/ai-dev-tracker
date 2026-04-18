@@ -7,7 +7,7 @@
 
 import { nanoid } from "@/lib/id";
 import { fetchAllSources } from "@/lib/sources";
-import { deduplicateItems, upsertItems, logFetchRun, getLastFetchTime, updateSignificanceScores, pruneOldItems, getRecentTitles } from "@/lib/db";
+import { deduplicateItems, upsertItems, logFetchRun, getLastFetchTime, updateSignificanceScores, pruneOldItems, getRecentTitles, closeDb } from "@/lib/db";
 import { calculateSignificanceScore } from "@/lib/scoring";
 import { promoteEligibleCandidates, restorePromotedCandidates } from "@/lib/discovery/candidates";
 
@@ -147,7 +147,9 @@ async function main() {
   console.log(`========================================\n`);
 }
 
-main().catch((error) => {
-  console.error("[Pipeline] Fatal error:", error);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error("[Pipeline] Fatal error:", error);
+    process.exitCode = 1;
+  })
+  .finally(() => closeDb());

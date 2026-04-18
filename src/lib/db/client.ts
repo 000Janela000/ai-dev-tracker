@@ -14,13 +14,27 @@ function getDatabaseUrl(): string {
 
 // Lazy initialization to avoid connection errors at import time
 let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
+let _client: ReturnType<typeof postgres> | null = null;
 
 export function getDb() {
   if (!_db) {
-    const client = postgres(getDatabaseUrl(), {
+    _client = postgres(getDatabaseUrl(), {
       prepare: false, // Required for Supabase Transaction pool mode
     });
-    _db = drizzle({ client, schema });
+    _db = drizzle({ client: _client, schema });
   }
   return _db;
+}
+
+/**
+ * Close the database connection pool. Call this at the end of CLI scripts
+ * so the Node process can exit — otherwise the postgres client keeps the
+ * event loop alive and the script hangs after "Complete".
+ */
+export async function closeDb(): Promise<void> {
+  if (_client) {
+    await _client.end({ timeout: 5 });
+    _client = null;
+    _db = null;
+  }
 }

@@ -11,7 +11,7 @@
 
 import { nanoid } from "@/lib/id";
 import { fetchLightSources } from "@/lib/sources";
-import { deduplicateItems, upsertItems, logFetchRun, getLastFetchTime, updateSignificanceScores, getRecentTitles } from "@/lib/db";
+import { deduplicateItems, upsertItems, logFetchRun, getLastFetchTime, updateSignificanceScores, getRecentTitles, closeDb } from "@/lib/db";
 import { calculateSignificanceScore } from "@/lib/scoring";
 
 const DEFAULT_LOOKBACK_HOURS = 4; // Shorter lookback for frequent runs
@@ -82,7 +82,9 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error("[Light Pipeline] Fatal:", error);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error("[Light Pipeline] Fatal:", error);
+    process.exitCode = 1;
+  })
+  .finally(() => closeDb());

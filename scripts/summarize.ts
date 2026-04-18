@@ -5,7 +5,7 @@
  * Run with: npx tsx --tsconfig tsconfig.json scripts/summarize.ts
  */
 
-import { getUnsummarizedItems, updateItemSummary, updateSignificanceScores } from "@/lib/db";
+import { getUnsummarizedItems, updateItemSummary, updateSignificanceScores, closeDb } from "@/lib/db";
 import { summarizeBatch } from "@/lib/summarizer";
 import { calculateSignificanceScore } from "@/lib/scoring";
 
@@ -82,7 +82,9 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error("[Summarizer] Fatal error:", error);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error("[Summarizer] Fatal error:", error);
+    process.exitCode = 1;
+  })
+  .finally(() => closeDb());
