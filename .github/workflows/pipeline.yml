@@ -11,6 +11,11 @@ on:
         required: false
         default: 'false'
         type: boolean
+      lookback_hours:
+        description: 'Override fetch lookback window in hours (default: time since last successful fetch)'
+        required: false
+        default: ''
+        type: string
 
 jobs:
   fetch-and-summarize:
@@ -32,6 +37,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          PIPELINE_LOOKBACK_HOURS: ${{ github.event.inputs.lookback_hours }}
 
       - name: Summarize new items
         if: ${{ github.event.inputs.skip_summarize != 'true' }}

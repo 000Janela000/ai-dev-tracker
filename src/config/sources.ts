@@ -24,9 +24,11 @@ export const SOURCE_REGISTRY: SourceConfig[] = [
   },
   {
     id: "rss:openai",
-    name: "OpenAI Blog",
+    name: "OpenAI News",
     type: "rss",
-    url: "https://openai.com/blog/rss.xml",
+    // The /blog/rss.xml path 307-redirects here. Use canonical to avoid
+    // the extra hop and to be resilient if OpenAI drops the redirect.
+    url: "https://openai.com/news/rss.xml",
     enabled: true,
     defaultCategory: "models_releases",
   },

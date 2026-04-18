@@ -33,25 +33,37 @@ async function main() {
     console.warn("[Pipeline] Could not restore promoted candidates (non-critical)");
   }
 
-  // Step 1: Determine since date
+  // Step 1: Determine since date.
+  // Priority: explicit PIPELINE_LOOKBACK_HOURS override > last successful
+  // fetch time > DEFAULT_LOOKBACK_HOURS. The override is useful for manual
+  // catch-up runs after a source URL is fixed.
   let since: Date;
-  try {
-    const lastFetch = await getLastFetchTime();
-    if (lastFetch) {
-      since = lastFetch;
-      console.log(`[Pipeline] Last fetch: ${since.toISOString()}`);
-    } else {
+  const overrideRaw = process.env.PIPELINE_LOOKBACK_HOURS?.trim();
+  const overrideHours = overrideRaw ? Number(overrideRaw) : NaN;
+
+  if (Number.isFinite(overrideHours) && overrideHours > 0) {
+    since = new Date(Date.now() - overrideHours * 60 * 60 * 1000);
+    console.log(
+      `[Pipeline] Override: looking back ${overrideHours}h (since ${since.toISOString()})`
+    );
+  } else {
+    try {
+      const lastFetch = await getLastFetchTime();
+      if (lastFetch) {
+        since = lastFetch;
+        console.log(`[Pipeline] Last fetch: ${since.toISOString()}`);
+      } else {
+        since = new Date(Date.now() - DEFAULT_LOOKBACK_HOURS * 60 * 60 * 1000);
+        console.log(
+          `[Pipeline] No previous fetch found, looking back ${DEFAULT_LOOKBACK_HOURS}h`
+        );
+      }
+    } catch {
       since = new Date(Date.now() - DEFAULT_LOOKBACK_HOURS * 60 * 60 * 1000);
       console.log(
-        `[Pipeline] No previous fetch found, looking back ${DEFAULT_LOOKBACK_HOURS}h`
+        `[Pipeline] Could not query last fetch time, looking back ${DEFAULT_LOOKBACK_HOURS}h`
       );
     }
-  } catch {
-    // Database might not be set up yet — use default lookback
-    since = new Date(Date.now() - DEFAULT_LOOKBACK_HOURS * 60 * 60 * 1000);
-    console.log(
-      `[Pipeline] Could not query last fetch time, looking back ${DEFAULT_LOOKBACK_HOURS}h`
-    );
   }
 
   // Step 2: Fetch all sources
