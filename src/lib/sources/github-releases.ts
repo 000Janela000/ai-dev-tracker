@@ -3,13 +3,19 @@ import { nanoid } from "@/lib/id";
 import type { DataSource, FetchResult, NewTrackedItem } from "@/lib/types";
 
 const FETCH_TIMEOUT_MS = 10_000;
+const USER_AGENT =
+  "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0 (compatible; DevNewsBot/1.1; +https://github.com/000Janela000/DevNews)";
 const parser = new Parser({ maxRedirects: 3 });
 
 /** Repos to watch for releases — auto-discovery can add more */
 export const RELEASE_WATCHLIST = [
   "openai/openai-python",
   "anthropics/anthropic-sdk-python",
+  "anthropics/claude-code",
+  "anthropics/claude-agent-sdk-typescript",
+  "anthropics/claude-agent-sdk-python",
   "langchain-ai/langchain",
+  "langchain-ai/langgraph",
   "huggingface/transformers",
   "ollama/ollama",
   "vercel/ai",
@@ -17,7 +23,77 @@ export const RELEASE_WATCHLIST = [
   "run-llama/llama_index",
   "microsoft/autogen",
   "crewAIInc/crewAI",
+  "mastra-ai/mastra",
 ];
+
+const MONOREPO_COLLAPSE_WINDOW_MS = 10 * 60 * 1000; // 10 min
+
+/**
+ * Monorepos like vercel/ai and langchain-ai/langchain cut 10-20 sub-package
+ * releases within a single minute (each with a distinct URL). Collapse any
+ * cluster of releases from one repo inside a 10-minute window into a single
+ * representative item so the feed isn't drowned by the wave.
+ */
+function collapseMonorepoWaves(
+  repo: string,
+  items: NewTrackedItem[]
+): NewTrackedItem[] {
+  if (items.length <= 1) return items;
+
+  // Sort most-recent first — the newest is the representative.
+  const sorted = [...items].sort(
+    (a, b) => b.publishedAt.getTime() - a.publishedAt.getTime()
+  );
+
+  const collapsed: NewTrackedItem[] = [];
+  const used = new Set<string>();
+
+  for (const item of sorted) {
+    if (used.has(item.id)) continue;
+
+    const windowStart = item.publishedAt.getTime() - MONOREPO_COLLAPSE_WINDOW_MS;
+    const wave = sorted.filter(
+      (o) =>
+        !used.has(o.id) &&
+        o.publishedAt.getTime() <= item.publishedAt.getTime() &&
+        o.publishedAt.getTime() >= windowStart
+    );
+
+    for (const w of wave) used.add(w.id);
+
+    if (wave.length === 1) {
+      collapsed.push(item);
+      continue;
+    }
+
+    // Prefer a wave member whose title has no "@" prefix (the root package).
+    const root = wave.find((w) => !/:\s*@/.test(w.title));
+    const primary = root ?? wave[0];
+    const otherPkgs = wave
+      .filter((w) => w !== primary)
+      .map((w) => w.title.split(":").slice(1).join(":").trim())
+      .filter(Boolean);
+
+    const mainTag = primary.title.split(":").slice(1).join(":").trim();
+    collapsed.push({
+      ...primary,
+      title: `${repo}: ${wave.length} package releases (${mainTag}, +${otherPkgs.length} more)`,
+      content:
+        `${repo} published ${wave.length} releases in one wave:\n` +
+        wave.map((w) => `- ${w.title.split(":").slice(1).join(":").trim()}`).join("\n") +
+        (primary.content ? `\n\nPrimary release notes:\n${primary.content}` : ""),
+      metadata: {
+        ...(primary.metadata as object),
+        waveSize: wave.length,
+        wavePackages: wave.map((w) =>
+          w.title.split(":").slice(1).join(":").trim()
+        ),
+      },
+    });
+  }
+
+  return collapsed;
+}
 
 async function fetchReleaseFeed(
   repo: string,
@@ -31,7 +107,7 @@ async function fetchReleaseFeed(
   try {
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: { "User-Agent": "DevNews/1.0" },
+      headers: { "User-Agent": USER_AGENT },
     });
     clearTimeout(timeout);
 
@@ -42,14 +118,14 @@ async function fetchReleaseFeed(
 
     const xml = await res.text();
     const feed = await parser.parseString(xml);
-    const items: NewTrackedItem[] = [];
+    const raw: NewTrackedItem[] = [];
 
     for (const entry of feed.items) {
       if (!entry.title || !entry.link) continue;
       const pubDate = entry.isoDate ? new Date(entry.isoDate) : new Date();
       if (pubDate < since) continue;
 
-      items.push({
+      raw.push({
         id: nanoid(),
         url: entry.link,
         urlNormalized: "",
@@ -69,7 +145,7 @@ async function fetchReleaseFeed(
       });
     }
 
-    return items;
+    return collapseMonorepoWaves(repo, raw);
   } catch (error) {
     clearTimeout(timeout);
     const msg = error instanceof Error ? error.message : String(error);

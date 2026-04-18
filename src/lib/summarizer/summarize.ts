@@ -26,11 +26,42 @@ const FLUFF_PATTERNS: RegExp[] = [
   /\bpractical guide\b/i,
   /\bfor (your )?future (projects?|reference)\b/i,
   /\bgood to know\b/i,
+  // Added after observing real output — these pass when the LLM has
+  // nothing concrete to describe in a changelog/release.
+  /\bvarious (updates|changes|fixes|improvements)\b/i,
+  /\bupdated dependencies\b/i,
+  /\breview the changelog\b/i,
+  /\bpatch changes?\b/i,
+  /\bminor (updates|improvements|changes)\b/i,
+  /\bbug fixes and improvements\b/i,
+  /\b(several|multiple) (updates|improvements|fixes|changes)\b/i,
+  /\bmay (require|need) (attention|review)\b/i,
+  /\bdetermine if any changes? affect\b/i,
 ];
 
 function isFluffy(summary: string): boolean {
   if (!summary) return false;
   return FLUFF_PATTERNS.some((p) => p.test(summary));
+}
+
+// Model family names that should tip an item into `models_releases`.
+const MODEL_NAME_RE =
+  /\b(claude|gpt|gemini|gemma|llama|qwen|deepseek|mistral|grok|phi|sonnet|opus|haiku|mythos|muse|qwen3)[ \-]?\d+(\.\d+)?[a-z]?\b/i;
+
+// Verbs that signal this is an actual release/launch, not a tangential mention.
+const RELEASE_VERB_RE =
+  /\b(released?|releasing|launch(?:es|ed|ing)?|ships?|shipped|unveil(?:s|ed|ing)?|introduc(?:es|ed|ing)|announc(?:es|ed|ing)|deb(?:u|ou)ts?|drops?|rolls?\s+out|open-weight)\b/i;
+
+/**
+ * Returns true when the item looks like a model launch rather than (e.g.)
+ * an SDK bump that happens to mention a model name. Requires BOTH a model
+ * name and a release verb — in the title, or both in the summary.
+ */
+function looksLikeModelRelease(title: string, summary: string): boolean {
+  const titleHit = MODEL_NAME_RE.test(title) && RELEASE_VERB_RE.test(title);
+  const summaryHit =
+    MODEL_NAME_RE.test(summary) && RELEASE_VERB_RE.test(summary);
+  return titleHit || summaryHit;
 }
 
 export interface SummarizeItemResult {
@@ -76,6 +107,20 @@ export async function summarizeItem(
             tags: resp.tags,
             isRelevant: false,
           },
+          provider: result.provider,
+        };
+      }
+
+      // Category rescue: the LLM consistently under-uses `models_releases`.
+      // If title/summary clearly name a model AND use a release verb, force
+      // the category regardless of what the LLM picked.
+      if (
+        resp.isRelevant &&
+        resp.category !== "models_releases" &&
+        looksLikeModelRelease(title, resp.summary)
+      ) {
+        return {
+          response: { ...resp, category: "models_releases" },
           provider: result.provider,
         };
       }
