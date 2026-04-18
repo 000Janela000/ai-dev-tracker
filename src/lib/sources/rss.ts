@@ -57,6 +57,7 @@ async function fetchSingleFeed(
   const feed = await fetchFeedSafe(url);
   if (!feed?.items) return [];
 
+  const rawCount = feed.items.length;
   const items: NewTrackedItem[] = [];
   for (const entry of feed.items) {
     if (!entry.title || !entry.link) continue;
@@ -83,6 +84,18 @@ async function fetchSingleFeed(
       },
       publishedAt: pubDate,
     });
+  }
+
+  // Make the "feed is healthy but quiet" case visible. A 0-items log is
+  // otherwise indistinguishable from "feed is broken".
+  if (items.length === 0 && rawCount > 0) {
+    console.log(
+      `[RSS] ${sourceId}: parsed ${rawCount} items, 0 within window (feed healthy, publisher quiet)`
+    );
+  } else if (rawCount === 0) {
+    console.warn(
+      `[RSS] ${sourceId}: parsed 0 items — feed may be broken or empty`
+    );
   }
 
   return items;

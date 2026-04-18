@@ -1,7 +1,9 @@
 import { sql } from "drizzle-orm";
 import { getDb, fetchLogs } from "@/lib/db";
 
-const STREAK_THRESHOLD = 3;
+// 5 consecutive zero runs ≈ 30h at the 6h cron cadence. Lower values
+// false-alarm on publishers who legitimately go quiet for a day.
+const STREAK_THRESHOLD = 5;
 
 export interface SourceHealthIssue {
   source: string;
