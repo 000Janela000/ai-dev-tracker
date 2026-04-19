@@ -1,66 +1,30 @@
-"use client";
-
 import Link from "next/link";
-import { Zap, Sparkles, Search } from "lucide-react";
-import { useState } from "react";
 import { HealthIndicator } from "./health-indicator";
 import { UserMenu } from "./user-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
 
+/**
+ * Global header. Intentionally minimal — the "brand" moment lives in the
+ * Masthead on the dashboard. This is just chrome: identity breadcrumb,
+ * health pulse, theme, account.
+ *
+ * Search was removed (it was non-functional) — the command palette
+ * (Phase 4, ⌘K) will be the search surface.
+ */
 export function Header() {
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
   return (
-    <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-12 max-w-3xl items-center justify-between px-4">
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-11 max-w-3xl items-center justify-between px-4">
         <Link
           href="/dashboard"
-          className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
+          className="font-serif text-[15px] font-medium tracking-tight text-foreground transition-opacity hover:opacity-80"
         >
-          <Zap className="size-4 text-yellow-400" />
-          <span className="text-sm font-semibold tracking-tight">DevNews</span>
+          DevNews
         </Link>
 
         <div className="flex items-center gap-1">
           <HealthIndicator />
-
-          {searchOpen ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (searchQuery.trim().length >= 2) {
-                  setSearchOpen(false);
-                }
-              }}
-              className="flex items-center"
-            >
-              <input
-                autoFocus
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onBlur={() => setSearchOpen(false)}
-                placeholder="Search..."
-                className="h-7 w-36 rounded-md border border-border bg-muted/50 px-2 text-xs outline-none placeholder:text-muted-foreground/50 focus:border-muted-foreground/30"
-              />
-            </form>
-          ) : (
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="rounded-md p-1.5 text-muted-foreground/50 transition-colors hover:text-muted-foreground"
-              aria-label="Search articles"
-            >
-              <Search className="size-3.5" />
-            </button>
-          )}
-
-          <Link
-            href="/digest"
-            className="rounded-md p-1.5 text-muted-foreground/50 transition-colors hover:text-muted-foreground"
-            aria-label="Weekly digest"
-          >
-            <Sparkles className="size-3.5" />
-          </Link>
-
+          <ThemeToggle />
           <UserMenu />
         </div>
       </div>

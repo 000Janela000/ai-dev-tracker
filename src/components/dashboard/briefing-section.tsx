@@ -1,6 +1,5 @@
 "use client";
 
-import { Clock } from "lucide-react";
 import { TrackedItemCard } from "./tracked-item-card";
 import type { ItemRow } from "@/lib/db";
 import type { Category } from "@/lib/types";
@@ -23,36 +22,31 @@ export function BriefingSection({ items, totalMinutes }: BriefingSectionProps) {
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <p className="text-sm text-muted-foreground">
-          Nothing new right now. Check back later.
+      <div className="py-24 text-center">
+        <p className="font-serif italic text-muted-foreground">
+          Nothing new this hour — the internet took a breath.
         </p>
       </div>
     );
   }
 
   return (
-    <div>
-      {/* Briefing header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">
-            Your Briefing
-          </h1>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {items.length} items curated for you
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5 rounded-full bg-muted/50 px-3 py-1">
-          <Clock className="size-3 text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground">
-            ~{totalMinutes}m
-          </span>
-        </div>
+    <section className="mx-auto max-w-3xl px-4">
+      {/* Section label — editorial kicker */}
+      <div className="smallcaps mb-1 flex items-baseline justify-between text-muted-foreground">
+        <span>The briefing</span>
+        <span className="font-mono tabular">
+          {items.length} items · ~{totalMinutes} min
+        </span>
       </div>
 
-      {/* Items */}
-      <div className="divide-y divide-border/30">
+      <h2 className="font-serif text-2xl font-medium tracking-tight text-foreground">
+        What shipped, what changed, and why you care.
+      </h2>
+
+      <div className="mt-2 h-px w-full bg-border" />
+
+      <div className="divide-y divide-border">
         {items.map((item) => (
           <TrackedItemCard
             key={item.id}
@@ -66,14 +60,12 @@ export function BriefingSection({ items, totalMinutes }: BriefingSectionProps) {
             importance={item.importance}
             readingTimeMin={item.readingTimeMin}
             clusterSize={
-              "clusterSize" in item
-                ? (item.clusterSize as number)
-                : undefined
+              "clusterSize" in item ? (item.clusterSize as number) : undefined
             }
             userStates={userStates[item.id] as UserAction[] | undefined}
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 }

@@ -20,25 +20,24 @@ export function MoreItemsSection({ items }: MoreItemsSectionProps) {
   if (items.length === 0) return null;
 
   return (
-    <div className="mt-8 border-t border-border/30 pt-4">
+    <section className="mx-auto mt-16 max-w-3xl px-4">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between py-2 text-sm text-muted-foreground transition-colors hover:text-muted-foreground"
-        aria-label={expanded ? "Show fewer items" : `Show ${items.length} more items`}
+        className="smallcaps flex w-full items-center justify-between border-t border-border py-4 text-muted-foreground transition-colors hover:text-foreground"
         aria-expanded={expanded}
       >
         <span>
-          {items.length} more item{items.length !== 1 ? "s" : ""}
+          Also today · {items.length} more item{items.length !== 1 ? "s" : ""}
         </span>
         {expanded ? (
-          <ChevronUp className="size-4" />
+          <ChevronUp className="size-4" strokeWidth={1.5} />
         ) : (
-          <ChevronDown className="size-4" />
+          <ChevronDown className="size-4" strokeWidth={1.5} />
         )}
       </button>
 
       {expanded && (
-        <div className="mt-2 divide-y divide-border/30">
+        <div className="divide-y divide-border">
           {items.map((item) => (
             <TrackedItemCard
               key={item.id}
@@ -60,6 +59,6 @@ export function MoreItemsSection({ items }: MoreItemsSectionProps) {
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }

@@ -5,16 +5,19 @@ import { formatDistanceToNow } from "date-fns";
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/lib/types";
-import { CATEGORY_LABELS } from "@/lib/types";
 import { ItemActions } from "./item-actions";
 import type { UserAction } from "@/lib/db/user-state";
 
-const CATEGORY_COLORS: Record<Category, string> = {
-  models_releases: "bg-blue-400",
-  tools_frameworks: "bg-emerald-400",
-  practices_approaches: "bg-amber-400",
-  industry_trends: "bg-purple-400",
-  research_papers: "bg-rose-400",
+/**
+ * Category dot colors — small inline indicator in the meta row. Tuned
+ * to sit next to warm-paper background without clashing.
+ */
+const CATEGORY_COLOR: Record<Category, string> = {
+  models_releases: "bg-[var(--cat-models)]",
+  tools_frameworks: "bg-[var(--cat-tools)]",
+  practices_approaches: "bg-[var(--cat-practices)]",
+  industry_trends: "bg-[var(--cat-industry)]",
+  research_papers: "bg-[var(--cat-research)]",
 };
 
 function getSourceLabel(source: string): string {
@@ -24,15 +27,17 @@ function getSourceLabel(source: string): string {
     return "r/" + source.replace("reddit:", "");
   const labels: Record<string, string> = {
     "rss:anthropic": "Anthropic",
+    "rss:anthropic-engineering": "Anthropic Eng",
     "rss:openai": "OpenAI",
     "rss:deepmind": "DeepMind",
     "rss:huggingface": "HuggingFace",
     "rss:vercel": "Vercel",
+    "rss:cursor": "Cursor",
     "rss:the-decoder": "The Decoder",
     "rss:ai-news": "AI News",
     "rss:marktechpost": "MarkTechPost",
     "rss:venturebeat-ai": "VentureBeat",
-    "rss:microsoft-ai": "Microsoft AI",
+    "rss:microsoft-research": "MSR",
     hackernews: "Hacker News",
     github: "GitHub",
     devto: "Dev.to",
@@ -68,80 +73,74 @@ export function TrackedItemCard({
   userStates,
 }: TrackedItemCardProps) {
   return (
-    <div className="group relative overflow-hidden">
+    <article className="group relative py-6 first:pt-0 last:pb-0">
       <Link
         href={`/item/${id}`}
-        className="block rounded-lg border border-transparent p-4 transition-all hover:border-border/50 hover:bg-muted/30"
+        className="block rounded-sm transition-colors"
         aria-label={title}
       >
-        {/* Category indicator + title */}
-        <div className="flex items-start gap-3">
-          <div
-            className={cn(
-              "mt-1.5 size-1.5 shrink-0 rounded-full",
-              CATEGORY_COLORS[category]
-            )}
-            title={CATEGORY_LABELS[category]}
+        {/* Meta row — small-caps, mono, breadcrumb-style */}
+        <div className="smallcaps flex flex-wrap items-center gap-x-2.5 gap-y-1 text-muted-foreground">
+          <span
+            aria-hidden
+            className={cn("inline-block size-[7px] rounded-full", CATEGORY_COLOR[category])}
           />
-          <div className="min-w-0 flex-1 pr-16">
-            <h2 className="text-[15px] font-medium leading-snug tracking-tight">
-              {title}
-            </h2>
-
-            {summary && (
-              <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
-                {summary}
-              </p>
-            )}
-
-            {/* Metadata line */}
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-              <span>{getSourceLabel(source)}</span>
-              <span>·</span>
-              <span>
-                {formatDistanceToNow(new Date(publishedAt), {
-                  addSuffix: true,
-                })}
-              </span>
-              {readingTimeMin && (
-                <>
-                  <span>·</span>
-                  <span>{readingTimeMin}m read</span>
-                </>
-              )}
-              {clusterSize && clusterSize > 1 && (
-                <>
-                  <span>·</span>
-                  <span className="text-purple-400/70">
-                    {clusterSize} sources
-                  </span>
-                </>
-              )}
-              {importance && importance >= 4 && (
-                <>
-                  <span>·</span>
-                  <span className="text-amber-400/70">high impact</span>
-                </>
-              )}
-            </div>
-          </div>
+          <span>{getSourceLabel(source)}</span>
+          <span aria-hidden>·</span>
+          <time
+            dateTime={new Date(publishedAt).toISOString()}
+            className="font-mono tabular"
+          >
+            {formatDistanceToNow(new Date(publishedAt), { addSuffix: true })}
+          </time>
+          {readingTimeMin ? (
+            <>
+              <span aria-hidden>·</span>
+              <span className="font-mono tabular">{readingTimeMin}m read</span>
+            </>
+          ) : null}
+          {clusterSize && clusterSize > 1 ? (
+            <>
+              <span aria-hidden>·</span>
+              <span>{clusterSize} sources</span>
+            </>
+          ) : null}
+          {importance && importance >= 4 ? (
+            <>
+              <span aria-hidden>·</span>
+              <span className="text-accent">high impact</span>
+            </>
+          ) : null}
         </div>
+
+        {/* Title — serif display, balanced, slightly tight */}
+        <h2 className="mt-2 font-serif text-[21px] font-medium leading-[1.2] tracking-tight text-foreground">
+          {title}
+        </h2>
+
+        {/* Summary — editorial italic lead-in style */}
+        {summary ? (
+          <p className="prose-body mt-2 text-[15px] text-muted-foreground">
+            {summary}
+          </p>
+        ) : null}
       </Link>
 
-      {/* Actions — appear on hover */}
-      <div className="absolute right-2 top-2 flex items-center gap-0.5 rounded-md bg-background/90 p-1 opacity-0 shadow-sm backdrop-blur-sm transition-opacity group-hover:opacity-100">
+      {/* Action bar — always visible, no hover-hide so touch works */}
+      <div className="mt-3 flex items-center justify-between gap-3">
         <ItemActions itemId={id} initialStates={userStates} compact />
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded p-1 text-muted-foreground/50 transition-colors hover:bg-muted hover:text-muted-foreground"
           onClick={(e) => e.stopPropagation()}
-          aria-label={`Read article: ${title}`}
+          className="smallcaps inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+          aria-label={`Open original: ${title}`}
         >
-          <ExternalLink className="size-3.5" />
+          Original
+          <ExternalLink className="size-3" strokeWidth={1.5} />
         </a>
       </div>
-    </div>
+    </article>
   );
 }

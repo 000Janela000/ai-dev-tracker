@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Header } from "@/components/dashboard/header";
+import { Masthead } from "@/components/masthead";
 import { DashboardContent } from "./content";
 import {
   getRecentItems,
@@ -12,7 +13,7 @@ import { clusterItems } from "@/lib/clustering";
 export const dynamic = "force-dynamic";
 
 const DEFAULT_WINDOW_HOURS = 48;
-const EXTENDED_WINDOW_HOURS = 168; // 7 days
+const EXTENDED_WINDOW_HOURS = 168;
 
 interface DashboardPageProps {
   searchParams: Promise<{ window?: string }>;
@@ -50,35 +51,41 @@ export default async function DashboardPage({
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="mx-auto max-w-2xl px-4 py-8">
-        {dbError && (
-          <div className="mb-6 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-3 text-xs text-yellow-400">
-            Database not connected. Set <code>DATABASE_URL</code> and run{" "}
-            <code>npm run db:push</code>.
+      <Masthead section="briefing" />
+      <main className="pb-24">
+        {dbError ? (
+          <div className="mx-auto max-w-3xl px-4">
+            <div className="rounded-sm border border-destructive/30 bg-destructive/5 p-4 font-serif text-sm italic text-destructive">
+              Database not connected. Set <code className="font-mono">DATABASE_URL</code> and
+              run <code className="font-mono">npm run db:push</code>.
+            </div>
           </div>
+        ) : (
+          <>
+            <DashboardContent
+              briefingItems={briefingItems}
+              remainingItems={remainingItems}
+              totalMinutes={totalMinutes}
+            />
+            <div className="mx-auto mt-16 flex max-w-3xl justify-center px-4 text-center">
+              {isExtended ? (
+                <Link
+                  href="/dashboard"
+                  className="smallcaps text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  ← Show only last 48 hours
+                </Link>
+              ) : (
+                <Link
+                  href="/dashboard?window=extended"
+                  className="smallcaps text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Show last 7 days →
+                </Link>
+              )}
+            </div>
+          </>
         )}
-        <DashboardContent
-          briefingItems={briefingItems}
-          remainingItems={remainingItems}
-          totalMinutes={totalMinutes}
-        />
-        <div className="mt-10 flex justify-center border-t border-border/40 pt-6 text-xs text-muted-foreground">
-          {isExtended ? (
-            <Link
-              href="/dashboard"
-              className="hover:text-foreground transition-colors"
-            >
-              ← Show only last 48 hours
-            </Link>
-          ) : (
-            <Link
-              href="/dashboard?window=extended"
-              className="hover:text-foreground transition-colors"
-            >
-              Show last 7 days →
-            </Link>
-          )}
-        </div>
       </main>
     </div>
   );
