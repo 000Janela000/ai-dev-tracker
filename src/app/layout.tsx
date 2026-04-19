@@ -1,70 +1,87 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import { Toaster } from "sonner";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
+  axes: ["opsz", "SOFT", "WONK"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "DevNews",
-    template: "%s | DevNews",
+    default: "DevNews — the AI developer's briefing",
+    template: "%s · DevNews",
   },
   description:
-    "Real-time dashboard tracking AI developments relevant to software development. Summaries-first, drill-down on demand.",
+    "A daily briefing of AI developments that matter to people who build software. Summaries first, drill-down on demand.",
   keywords: [
     "AI",
-    "artificial intelligence",
     "developer tools",
-    "machine learning",
     "LLM",
-    "software development",
+    "Claude",
+    "GPT",
+    "AI coding",
+    "MCP",
+    "agents",
     "AI news",
   ],
   authors: [{ name: "DevNews" }],
   openGraph: {
     title: "DevNews",
-    description:
-      "Real-time dashboard tracking AI developments for software engineers",
+    description: "A daily briefing of AI developments that matter to people who build software.",
     type: "website",
     siteName: "DevNews",
   },
   twitter: {
     card: "summary_large_image",
     title: "DevNews",
-    description:
-      "Real-time dashboard tracking AI developments for software engineers",
+    description: "A daily briefing of AI developments that matter to people who build software.",
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf8f4" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1c20" },
+  ],
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${fraunces.variable} ${geistMono.variable} antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                fontFamily: "var(--font-fraunces), serif",
+                fontSize: "14px",
+              },
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );
